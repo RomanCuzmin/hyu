@@ -1,21 +1,20 @@
 ```
 # Build artifacts
-*.obj
+bin/
+obj/
 *.exe
 *.dll
 *.pdb
-*.user
-*.suo
+*.userprefs
 *.cache
+*.compiled
 *.nupkg
 *.snupkg
-bin/
-obj/
 
 # Dependencies
 packages/
 node_modules/
-vendor/
+.nuget/
 
 # Logs
 *.log
@@ -23,9 +22,12 @@ vendor/
 # User-specific files
 .vs/
 .idea/
-*.userprefs
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
-# Environment
+# Environment specific settings
 .env
 .env.local
 *.env.*
@@ -34,7 +36,7 @@ vendor/
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# Testing
-TestResults/
+$RECYCLE.BIN/
+ehthumbs.db
+Icon?
 ```

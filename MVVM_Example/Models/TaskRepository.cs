@@ -1,40 +1,53 @@
-namespace MVVM_Example.Models;
+using System.Collections.ObjectModel;
+using MVVM_Example.Models;
 
-/// <summary>
-/// Model - репозиторий для хранения задач (имитация базы данных)
-/// </summary>
-public class TaskRepository
+namespace MVVM_Example.Models
 {
-    private readonly List<Task> _tasks = new();
-    private int _nextId = 1;
-
-    public IReadOnlyList<Task> GetAllTasks() => _tasks.AsReadOnly();
-
-    public Task AddTask(string title)
+    public class TaskRepository
     {
-        var task = new Task
-        {
-            Id = _nextId++,
-            Title = title,
-            IsCompleted = false,
-            CreatedAt = DateTime.Now
-        };
-        _tasks.Add(task);
-        return task;
-    }
+        private readonly ObservableCollection<TaskItem> _tasks = new();
+        private int _nextId = 1;
 
-    public void RemoveTask(int id)
-    {
-        var task = _tasks.FirstOrDefault(t => t.Id == id);
-        if (task != null)
+        public ObservableCollection<TaskItem> Tasks => _tasks;
+
+        public void AddTask(string title, string description)
         {
-            _tasks.Remove(task);
+            var task = new TaskItem
+            {
+                Id = _nextId++,
+                Title = title,
+                Description = description,
+                IsCompleted = false
+            };
+            _tasks.Add(task);
+        }
+
+        public void ToggleTask(int id)
+        {
+            var task = _tasks.FirstOrDefault(t => t.Id == id);
+            if (task != null)
+            {
+                task.IsCompleted = !task.IsCompleted;
+                task.CompletedAt = task.IsCompleted ? DateTime.Now : null;
+            }
+        }
+
+        public void RemoveTask(int id)
+        {
+            var task = _tasks.FirstOrDefault(t => t.Id == id);
+            if (task != null)
+            {
+                _tasks.Remove(task);
+            }
+        }
+
+        public void ClearCompleted()
+        {
+            var completedTasks = _tasks.Where(t => t.IsCompleted).ToList();
+            foreach (var task in completedTasks)
+            {
+                _tasks.Remove(task);
+            }
         }
     }
-
-    public Task? GetTaskById(int id) => _tasks.FirstOrDefault(t => t.Id == id);
-
-    public int GetTotalCount() => _tasks.Count;
-
-    public int GetCompletedCount() => _tasks.Count(t => t.IsCompleted);
 }
