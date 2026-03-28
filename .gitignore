@@ -1,0 +1,50 @@
+```
+# Dependencies
+packages/
+bin/
+obj/
+
+# Build results
+Debug/
+Release/
+x64/
+x86/
+build/
+dist/
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Python (if any Python parts)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Temporary files
+*.tmp
+*.temp
+```
