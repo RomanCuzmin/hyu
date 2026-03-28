@@ -1,24 +1,25 @@
-namespace MVVM_Example.Core;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
-/// <summary>
-/// Базовый класс для реализации паттерна Observable (INotifyPropertyChanged)
-/// </summary>
-public abstract class ObservableObject : INotifyPropertyChanged
+namespace MVVM_Example.Core
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged(string propertyName)
+    public class ObservableObject : INotifyPropertyChanged
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected bool SetProperty<T>(ref T field, T value, string propertyName)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value))
-            return false;
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
+        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return false;
+
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
     }
 }

@@ -1,131 +1,78 @@
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using MVVM_Example.Core;
 using MVVM_Example.Models;
 
-namespace MVVM_Example.ViewModels;
-
-/// <summary>
-/// ViewModel - содержит бизнес-логику и данные для представления
-/// </summary>
-public class TaskViewModel : ObservableObject
+namespace MVVM_Example.ViewModels
 {
-    private readonly TaskRepository _repository;
-    private string _newTaskTitle = string.Empty;
-    private string _statusMessage = string.Empty;
-
-    public ObservableCollection<Task> Tasks { get; }
-    
-    public string NewTaskTitle
+    public class TaskViewModel : ObservableObject
     {
-        get => _newTaskTitle;
-        set
+        private readonly TaskRepository _repository;
+        private string _newTaskTitle = string.Empty;
+        private string _newTaskDescription = string.Empty;
+        private TaskItem? _selectedTask;
+
+        public TaskViewModel()
         {
-            if (SetProperty(ref _newTaskTitle, value, nameof(NewTaskTitle)))
+            _repository = new TaskRepository();
+            
+            AddTaskCommand = new RelayCommand(AddTask, _ => !string.IsNullOrWhiteSpace(NewTaskTitle));
+            ToggleTaskCommand = new RelayCommand(ToggleTask);
+            RemoveTaskCommand = new RelayCommand(RemoveTask);
+            ClearCompletedCommand = new RelayCommand(_ => _repository.ClearCompleted());
+            DeleteSelectedCommand = new RelayCommand(_ => SelectedTask = null, _ => SelectedTask != null);
+        }
+
+        public ObservableCollection<TaskItem> Tasks => _repository.Tasks;
+
+        public string NewTaskTitle
+        {
+            get => _newTaskTitle;
+            set => SetProperty(ref _newTaskTitle, value);
+        }
+
+        public string NewTaskDescription
+        {
+            get => _newTaskDescription;
+            set => SetProperty(ref _newTaskDescription, value);
+        }
+
+        public TaskItem? SelectedTask
+        {
+            get => _selectedTask;
+            set => SetProperty(ref _selectedTask, value);
+        }
+
+        public ICommand AddTaskCommand { get; }
+        public ICommand ToggleTaskCommand { get; }
+        public ICommand RemoveTaskCommand { get; }
+        public ICommand ClearCompletedCommand { get; }
+        public ICommand DeleteSelectedCommand { get; }
+
+        private void AddTask(object? parameter)
+        {
+            if (string.IsNullOrWhiteSpace(NewTaskTitle))
+                return;
+
+            _repository.AddTask(NewTaskTitle, NewTaskDescription);
+            NewTaskTitle = string.Empty;
+            NewTaskDescription = string.Empty;
+        }
+
+        private void ToggleTask(object? parameter)
+        {
+            if (parameter is TaskItem task)
             {
-                OnPropertyChanged(nameof(CanAddTask));
+                _repository.ToggleTask(task.Id);
             }
         }
-    }
 
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set => SetProperty(ref _statusMessage, value, nameof(StatusMessage));
-    }
-
-    public bool CanAddTask => !string.IsNullOrWhiteSpace(NewTaskTitle);
-
-    public int TotalCount => _repository.GetTotalCount();
-    
-    public int CompletedCount => _repository.GetCompletedCount();
-
-    // Команды
-    public Command AddTaskCommand { get; }
-    public Command RemoveTaskCommand { get; }
-    public Command ToggleTaskCommand { get; }
-    public Command ClearCompletedCommand { get; }
-
-    public TaskViewModel()
-    {
-        _repository = new TaskRepository();
-        Tasks = new ObservableCollection<Task>();
-        
-        AddTaskCommand = new Command(AddTask, () => CanAddTask);
-        RemoveTaskCommand = new Command(RemoveTask);
-        ToggleTaskCommand = new Command(ToggleTask);
-        ClearCompletedCommand = new Command(ClearCompletedTasks);
-
-        LoadTasks();
-        UpdateStatusMessage();
-    }
-
-    private void LoadTasks()
-    {
-        var tasks = _repository.GetAllTasks();
-        foreach (var task in tasks)
+        private void RemoveTask(object? parameter)
         {
-            Tasks.Add(task);
+            if (parameter is TaskItem task)
+            {
+                _repository.RemoveTask(task.Id);
+            }
         }
-    }
-
-    private void AddTask()
-    {
-        if (string.IsNullOrWhiteSpace(NewTaskTitle))
-            return;
-
-        var task = _repository.AddTask(NewTaskTitle.Trim());
-        Tasks.Add(task);
-        NewTaskTitle = string.Empty;
-        UpdateStatusMessage();
-        
-        Console.WriteLine($"✓ Задача добавлена: \"{task.Title}\"");
-    }
-
-    private void RemoveTask(object? parameter)
-    {
-        if (parameter is Task task)
-        {
-            _repository.RemoveTask(task.Id);
-            Tasks.Remove(task);
-            UpdateStatusMessage();
-            
-            Console.WriteLine($"✓ Задача удалена: \"{task.Title}\"");
-        }
-    }
-
-    private void ToggleTask(object? parameter)
-    {
-        if (parameter is Task task)
-        {
-            task.IsCompleted = !task.IsCompleted;
-            UpdateStatusMessage();
-            
-            var status = task.IsCompleted ? "выполнена" : "активна";
-            Console.WriteLine($"✓ Задача \"{task.Title}\" теперь {status}");
-        }
-    }
-
-    private void ClearCompletedTasks()
-    {
-        var completedTasks = Tasks.Where(t => t.IsCompleted).ToList();
-        foreach (var task in completedTasks)
-        {
-            _repository.RemoveTask(task.Id);
-            Tasks.Remove(task);
-        }
-        UpdateStatusMessage();
-        
-        Console.WriteLine($"✓ Удалено выполненных задач: {completedTasks.Count}");
-    }
-
-    private void UpdateStatusMessage()
-    {
-        var total = _repository.GetTotalCount();
-        var completed = _repository.GetCompletedCount();
-        var pending = total - completed;
-        
-        StatusMessage = $"Всего: {total} | Выполнено: {completed} | В ожидании: {pending}";
-        OnPropertyChanged(nameof(TotalCount));
-        OnPropertyChanged(nameof(CompletedCount));
     }
 }
