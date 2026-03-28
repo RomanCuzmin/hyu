@@ -1,1 +1,40 @@
-Nothing needs to be added to the .gitignore file since the only change was the deletion of a Python source file (mvvm_example.py), which doesn't require any new ignore rules.
+```
+# Build artifacts
+*.obj
+*.exe
+*.dll
+*.pdb
+*.user
+*.suo
+*.cache
+*.nupkg
+*.snupkg
+bin/
+obj/
+
+# Dependencies
+packages/
+node_modules/
+vendor/
+
+# Logs
+*.log
+
+# User-specific files
+.vs/
+.idea/
+*.userprefs
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing
+TestResults/
+```
